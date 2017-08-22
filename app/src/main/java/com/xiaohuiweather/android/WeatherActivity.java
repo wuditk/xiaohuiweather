@@ -1,5 +1,6 @@
 package com.xiaohuiweather.android;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.xiaohuiweather.android.gson.Forecast;
 import com.xiaohuiweather.android.gson.Weather;
+import com.xiaohuiweather.android.service.AutoUpdateService;
 import com.xiaohuiweather.android.util.HttpUtil;
 import com.xiaohuiweather.android.util.Utility;
 
@@ -145,6 +147,7 @@ public class WeatherActivity extends AppCompatActivity {
                             SharedPreferences.Editor editor= PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
                             editor.putString("weather",responseText);
                             editor.apply();
+
                             showWeatherInfo(weather);
 
                         }else {
@@ -168,6 +171,14 @@ public class WeatherActivity extends AppCompatActivity {
         degreeText.setText(degree);
         weatherInfoText.setText(weatherInfo);
         forecastLayout.removeAllViews();
+
+        if (weather !=null&&"ok".equals(weather.status)){
+            Intent intent = new Intent(this,AutoUpdateService.class);
+            startService(intent);
+        }else {
+            Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
+        }
+
         for (Forecast forecast : weather.forecastList){
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_item,forecastLayout,false);
             TextView dateText = (TextView)view.findViewById(R.id.date_text);
